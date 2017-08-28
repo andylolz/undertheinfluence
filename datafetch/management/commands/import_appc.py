@@ -13,18 +13,18 @@ from datafetch import models, helpers
 
 class Command(BaseCommand):
     help = 'Import APPC register'
-    base_url = "http://www.appc.org.uk"
+    base_url = "https://www.appc.org.uk"
     source_url_tmpl = "http://www.undertheinfluence.org.uk/appc-redirect/?{}"
 
     def add_arguments(self, parser):
         parser.add_argument('--refresh', action='store_true')
 
     def _fetch_company(self, company, path):
-        # print("Fetching HTML for '{}' ...".format(company))
-        url = "{}/members/register/register-profile/".format(self.base_url)
-        filename = "{}.html".format(slugify(company))
+        # print("Fetching HTML for '{}' ...".format(company["name"]))
+        url = "{}/register/profile/".format(self.base_url)
+        filename = "{}.html".format(slugify(company["name"]))
         headers = {'User-Agent': 'Mozilla/5.0'}
-        data = {"company": company}
+        data = {"companyid": company["id"]}
         t = helpers.fetch_text(url, filename, path=path, headers=headers, data=data, method="post", refresh=self.refresh)
         return t
 
@@ -125,7 +125,7 @@ class Command(BaseCommand):
 
         helpers.create_data_folder("appc")
 
-        index_url = "{}/members/register/".format(self.base_url)
+        index_url = "{}/register/current-register/".format(self.base_url)
         t = helpers.fetch_text(index_url, "index.html", path="appc", refresh=True)
         soup = BeautifulSoup(t, "html5lib")
 
@@ -134,7 +134,10 @@ class Command(BaseCommand):
         path = join("appc", date_range[1])
         helpers.create_data_folder(path)
 
-        companies = [x["value"] for x in soup.find_all("input", {"name": "company"})]
+        companies = [{
+            "id": x.find("input", {"name": "companyid"})["value"],
+            "name": x.find("input", {"name": "company"})["value"],
+        } for x in soup.find_all(class_="member-list-profile")]
         for company in companies:
             html = self._fetch_company(company, path)
             self._scrape_company_html(html, date_range)
