@@ -76,6 +76,7 @@ class Command(BaseCommand):
         staff_soup = soup.find(class_="profile-staff")
         all_staff = [x.text.strip() for x in staff_soup.find_all("li")] if staff_soup else []
         for staff_name in all_staff:
+            staff_name = re.sub('  +', ' ', staff_name)
             if staff_name.endswith(" *"):
                 staff_name = staff_name[:-2].strip()
                 # TODO: Somehow flag that these staff members have parliamentary passes
