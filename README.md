@@ -33,7 +33,7 @@ UnderTheInfluence requires:
  * Fetch this repo and all submodules
 
    ```
-   git clone --recursive https://github.com/spudmind/undertheinfluence.git
+   git clone --recursive https://github.com/whoslobbying/undertheinfluence.git
    ```
 
  * Install the required python packages
